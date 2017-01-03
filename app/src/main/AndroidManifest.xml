@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.my.facebookauth">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
+
+
+    <application
+        android:name=".Activities.facebookauth"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <activity android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:label="@string/app_name"
+            tools:replace="android:theme"/>
+
+        <!--<activity android:name="com.facebook.CustomTabActivity"-->
+            <!--android:exported="true">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.VIEW" />-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--<category android:name="android.intent.category.BROWSABLE" />-->
+                <!--<data android:scheme="@string/fb_login_protocol_scheme" />-->
+            <!--</intent-filter>-->
+        <!--</activity>-->
+
+        <activity android:name=".Activities.FacebookLoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
+
+        <activity android:name=".Activities.display_profile"
+            android:label="profile" />
+        <activity android:name=".Activities.FriendsList"
+            android:label="Friends" />
+        <activity android:name=".Activities.FriendProfile"
+            android:label="profile" />
+        <activity android:name=".Activities.MessageActivity"
+            android:label="messages" />
+        <activity android:name=".Activities.event_feed"
+            android:label="events" />
+        <activity android:name=".Activities.getLocationActivity"
+            android:label="current location" />
+        <activity android:name=".Activities.CreateEvent"
+            android:label="create event" />
+        <activity android:name=".Activities.inviteFriendsActivity"
+            android:label="Invite Friends" />
+        <activity android:name=".Activities.CalendarActivity"
+            android:label="Calendar" />
+    </application>
+
+
+</manifest>
