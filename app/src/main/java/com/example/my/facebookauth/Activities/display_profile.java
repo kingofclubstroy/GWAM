@@ -37,6 +37,7 @@ import static com.example.my.facebookauth.R.id.calenderButton;
  */
 //This activity is the temporary functional hub for testing, and the first activity if signed on
 //// TODO: 2017-01-03 gut this whole thing, initial activity will be event feed in the final shit
+    //i am a butt
 
 public class display_profile extends AppCompatActivity implements View.OnClickListener {
 
