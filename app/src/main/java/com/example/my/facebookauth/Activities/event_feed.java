@@ -3,8 +3,10 @@ package com.example.my.facebookauth.Activities;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,9 +15,7 @@ import android.widget.ListView;
 import com.example.my.facebookauth.R;
 import com.example.my.facebookauth.models.event;
 import com.example.my.facebookauth.models.eventListAdapter;
-import com.example.my.facebookauth.utilities.ObjectSerializer;
 import com.facebook.Profile;
-import com.fasterxml.jackson.databind.ser.std.ObjectArraySerializer;
 import com.firebase.client.AuthData;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -32,12 +32,10 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
-import static android.R.attr.id;
-import static android.R.attr.key;
+import static android.R.id.list;
 
 /**
  * Created by Owner on 2016-11-12.
@@ -47,7 +45,7 @@ public class event_feed extends AppCompatActivity {
 
     private String TAG = event_feed.class.getSimpleName();
     private FirebaseAuth mAuth;
-    private ArrayList<event> eventList;
+    private List<event> eventList;
     private double lat;
     private double lng;
     private DatabaseReference geofireRef;
@@ -64,36 +62,44 @@ public class event_feed extends AppCompatActivity {
     private GeoQueryEventListener geoListener;
     private DatabaseReference mRef;
     private String id;
-    private int interested_events;
     private SharedPreferences.Editor editor;
     private SharedPreferences settings;
     private List<String> eventKeys;
-
+    private String interested_events;
 
 
 //// TODO: 2016-12-04 will have to change into a listview, that is reactive to value listeners,
 // so we can just keep track of a list isntead of writing to the event database
     //but may be working for now
-
+    //// TODO: 2017-01-03 need to make everything reactive to events ending
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.event_feed);
+
+        //initializes list view which holds each event in the feed
         mListView = (ListView) findViewById(R.id.event_feed_listview);
+
+        //inits saved preference storage
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = settings.edit();
+
+        //holds
+        eventList = new ArrayList<>();
+
+        mRef = FirebaseDatabase.getInstance().getReference();
+
         mAuth = FirebaseAuth.getInstance();
         uid = mAuth.getCurrentUser().getUid();
-        eventList = new ArrayList<>();
-        mContext = this;
-        mRef = FirebaseDatabase.getInstance().getReference();
+
         id = Profile.getCurrentProfile().getId();
 
+        interested_events = "interested events";
 
 
 
-       
-        //// TODO: 2016-11-25 im a bad boy, cardcoded to test, lat and long needs to be put into savedpreferences 
         lat = 37.4219983333333335;
         lng = -122.0840000000000002;
         findViewById(R.id.event_feed_create_event).setOnClickListener(new View.OnClickListener() {
@@ -102,7 +108,7 @@ public class event_feed extends AppCompatActivity {
                 createDummyEvents();
             }
         });
-        
+
         eventRef = FirebaseDatabase.getInstance().getReference().child("events");
         geofireRef = FirebaseDatabase.getInstance().getReference().child("eventLocation");
         geofire = new GeoFire(geofireRef);
@@ -114,11 +120,9 @@ public class event_feed extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        settings = getSharedPreferences("event_preferences", 0);
-        interested_events = settings.getInt("interested_events", 0);
-        Log.e("onStart: ", "interested events: " + interested_events);
-        editor = settings.edit();
-        //eventKeys = getDataAsArray();
+        eventKeys = getListString("interested_events_id");
+        eventList = getListevents(interested_events);
+        Log.e("eventKeys", "=" + eventKeys);
 
         if (geoQueryBool == false) {
             geoQuery = geofire.queryAtLocation(new GeoLocation(lat, lng), 1.0);
@@ -132,8 +136,7 @@ public class event_feed extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             String key = dataSnapshot.getKey();
-
-//                            if(!eventKeys.contains(key)) {
+                            if(!eventKeys.contains(key)) {
                                 if (!meventListAdapter.exists(key)) {
                                     Log.e(TAG, "item added " + key);
                                     meventListAdapter.addSingle(dataSnapshot);
@@ -143,7 +146,7 @@ public class event_feed extends AppCompatActivity {
                                     meventListAdapter.update(dataSnapshot, key);
                                     meventListAdapter.notifyDataSetChanged();
                                 }
-                            //}
+                            }
                         }
 
                         @Override
@@ -185,6 +188,7 @@ public class event_feed extends AppCompatActivity {
                     event newEvent = (event) adapterView.getItemAtPosition(i);
                     String event_id = newEvent.getId();
                     eventKeys.add(event_id);
+                    eventList.add(newEvent);
                     //setDataAsArray(eventKeys);
                     for (String key : eventKeys) {
                         Log.e("OnClick", "" + key);
@@ -208,8 +212,8 @@ public class event_feed extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.e(TAG, "onPause!!!");
+        putListEvent(interested_events, eventList);
         geoQuery.removeAllListeners();
-
 
     }
 
@@ -235,44 +239,44 @@ public class event_feed extends AppCompatActivity {
             fakeEvents.child(eventId).setValue(happening);
 
 
-
         }
     }
 
-//    private List<String> getDataFromSharedPreferences() {
-//        Gson gson = new Gson();
-//        List<String> eventKeysFromShared = new ArrayList<>();
-//        SharedPreferences sharedPref = getSharedPreferences("event_preferences", 0);
-//        String jsonPreference = sharedPref.getString("interested_events", "");
-//
-//        Type type = new TypeToken<List<String>>() {}.getType();
-//        eventKeysFromShared = gson.fromJson(jsonPreference, type);
-//
-//        return eventKeysFromShared;
-//    }
-//
-//    private void setDataFromSharedPreferences(String key) {
-//        Gson gson = new Gson();
-//        String jsonCurProduct = gson.toJson(key);
-//
-//        SharedPreferences sharedPref = getSharedPreferences("event_preferences", 0);
-//        SharedPreferences.Editor editor = sharedPref.edit();
-//
-//        editor.putString("interested_events", jsonCurProduct);
-//        editor.commit();
-//    }
-//
-//    private void setDataAsArray(List eventList) {
-//        SharedPreferences.Editor editor = settings.edit();
-//        Set<String> eventSet = new HashSet<String>(eventList);
-//        editor.putStringSet("interested_events", eventSet);
-//        editor.commit();
-//    }
-//
-//    //// TODO: 2016-12-16 cant turn list into set;
-//    private List<String> getDataAsArray() {
-//        Set<String> eventSet = settings.getStringSet("interested_events", new HashSet<String>());
-//        List<String> eventList = new ArrayList<String>(eventSet);
-//        return eventList;
-//    }
+    public List<event> getListevents(String key) {
+        Gson gson = new Gson();
+        String json = settings.getString(key, "");
+        Type type = new TypeToken<List<event>>(){}.getType();
+        List<event> eventList = gson.fromJson(json, type);
+        return eventList;
+        //return new ArrayList<String>(Arrays.asList(TextUtils.split(settings.getString(key, ""), "‚‗‚")));
+
+    }
+
+    public List<String> getListString(String key) {
+        Gson gson = new Gson();
+        String json = settings.getString(key, "");
+        Type type = new TypeToken<List<String>>(){}.getType();
+        List<String> list = gson.fromJson(json, type);
+        return list;
+
+    }
+    public void putListEvent(String key, List<event> stringList) {
+        Gson gson = new Gson();
+        String jsonEvents = gson.toJson(stringList);
+        editor.putString(key, jsonEvents);
+        editor.commit();
+    }
+
+    public void putListString(String key, List<String> stringList) {
+        Gson gson = new Gson();
+        String jsonEvents = gson.toJson(stringList);
+        editor.putString(key, jsonEvents);
+        editor.commit();
+    }
+
+    public void checkForNull(String key){
+        if (key == null){
+            throw new NullPointerException();
+        }
+    }
 }

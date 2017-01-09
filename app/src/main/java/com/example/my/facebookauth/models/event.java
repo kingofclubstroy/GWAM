@@ -16,6 +16,10 @@ public class event {
     private String category;
     private ArrayList<String> invites;
     private String id;
+    private long startTime;
+    private long endTime;
+    private String startTimeString;
+    private String endTimeString;
 
 
     public event() {
@@ -23,21 +27,30 @@ public class event {
     }
 
     public event(String host, String title, String description, String category, ArrayList<String> invites) {
+                 //long startTime, long endTime, String startTimeString, String endTimeString) {
         this.host = host;
         this.title = title;
         this.description = description;
         this.category = category;
         this.invites = invites;
-
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.endTimeString = endTimeString;
+        this.startTimeString = startTimeString;
     }
 
-    public event(String host, String title, String description, String category, ArrayList<String> invites, String id) {
+    public event(String host, String title, String description, String category, ArrayList<String> invites,
+                 String id) { //long startTime, long endTime, String startTimeString, String endTimeString ) {
         this.host = host;
         this.title = title;
         this.description = description;
         this.category = category;
         this.invites = invites;
         this.id = id;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.endTimeString = endTimeString;
+        this.startTimeString = startTimeString;
     }
 
     public void setHost(String host) {
@@ -87,4 +100,36 @@ public class event {
     public void setId(String id) {
         this.id = id;
     }
+
+//    public long getEndTime() {
+//        return endTime;
+//    }
+//
+//    public long getStartTime() {
+//        return startTime;
+//    }
+//
+//    public String getEndTimeString() {
+//        return endTimeString;
+//    }
+//
+//    public String getStartTimeString() {
+//        return startTimeString;
+//    }
+//
+//    public void setEndTime(long endTime) {
+//        this.endTime = endTime;
+//    }
+//
+//    public void setStartTime(long startTime) {
+//        this.startTime = startTime;
+//    }
+//
+//    public void setEndTimeString(String endTimeString) {
+//        this.endTimeString = endTimeString;
+//    }
+//
+//    public void setStartTimeString(String startTimeString) {
+//        this.startTimeString = startTimeString;
+//    }
 }

@@ -97,10 +97,6 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
 
         publicProfileListener();
 
-
-
-
-
     }
 
     //does other buttons, sloppy but not permanent

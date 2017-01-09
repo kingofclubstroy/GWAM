@@ -12,4 +12,9 @@
     <string name="id_fmt">User ID: %s</string>
     <string name="email_fmt">Email: %s</string>
 
+    <string-array name="AMPM">
+        <item>AM</item>
+        <item>PM</item>
+    </string-array>
+
 </resources>

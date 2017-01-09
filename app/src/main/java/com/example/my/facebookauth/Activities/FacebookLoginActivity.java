@@ -41,7 +41,7 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 
-
+//this is the first activity to run if they are not logged on, sign into facebook, and get relivent information
 public class FacebookLoginActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final String TAG = "FacebookLogin";
@@ -60,72 +60,28 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
 
     private CallbackManager mCallbackManager;
 
+    private FirebaseUser Fb_user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        facebookSDKInitialize();
-        setContentView(R.layout.activity_facebook_login);
 
-        //Views
-        mStatusTextView = (TextView) findViewById(R.id.status);
-        mDetailTextView = (TextView) findViewById(R.id.detail);
-        findViewById(R.id.button_facebook_signout).setOnClickListener(this);
+        facebookSDKInitialize();
+
+        setContentView(R.layout.activity_facebook_login);
 
         mAuth = FirebaseAuth.getInstance();
 
         mDatabase = new Firebase("https://facebookauth-2483e.firebaseio.com/");
 
-        FirebaseUser Fb_user = FirebaseAuth.getInstance().getCurrentUser();
-        if (Fb_user != null) {
-            //user is signed in, send to event feed
-            //// TODO: 2016-11-18 this
+        Fb_user = FirebaseAuth.getInstance().getCurrentUser();
 
-        }
+        setUpViews();
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser muser = firebaseAuth.getCurrentUser();
-                if (muser != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + muser.getUid());
+        userChangedListener();
 
-                    Intent intent = new Intent(getApplicationContext(), display_profile.class);
 
-                    startActivity(intent);
-                }
-                else {
-                    //user is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-
-                updateUI(muser);
-            }
-        };
-
-        // Initialize facebook login button
-        LoginButton loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
-        loginButton.setReadPermissions(Arrays.asList("public_profile", "email", "user_friends"));
-        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" +loginResult);
-                handleFacebookAccessToken(loginResult.getAccessToken());
-                getLoginDetails(loginResult.getAccessToken());
-            }
-
-            @Override
-            public void onCancel() {
-                Log.d(TAG, "facebook:onCancel");
-                updateUI(null);
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.d(TAG, "facebook:onError", error);
-                updateUI(null);
-            }
-        });
+        facebookLoginButton();
     }
 
     @Override
@@ -142,12 +98,22 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
         }
     }
 
+    /**
+     * tells facebook what to do after login result
+     * @param requestCode code detailing what is requested
+     * @param resultCode shows if accepted or rejected
+     * @param data data recieved from facebook
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * signs into facebook and gets personal info, like profile picture and name and saves to database
+     * @param token token indicating logged on user
+     */
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         showProgressDialog();
@@ -159,8 +125,6 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        final String uid = task.getResult().getUser().getUid();
-
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(FacebookLoginActivity.this, "Authentication failed.",
@@ -168,55 +132,9 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
                         }
 
                         else {
-                            String name = task.getResult().getUser().getDisplayName();
-                            String email = task.getResult().getUser().getEmail();
-                            String image = task.getResult().getUser().getPhotoUrl().toString();
-                            String id = Profile.getCurrentProfile().getId();
 
+                            saveUserToDatabase(task);
 
-                            user = new User(uid, name, null, email, null, image, true, id);
-                            mDatabase.child("users").child(uid).child("info").setValue(user);
-                            mDatabase.child("public_profile").child(id).child("info").setValue(user);
-//                            GraphRequestBatch batch = new GraphRequestBatch(
-//                                    GraphRequest.newMyFriendsRequest(
-//                                            AccessToken.getCurrentAccessToken(),
-//                                            new GraphRequest.GraphJSONArrayCallback() {
-//                                                @Override
-//                                                public void onCompleted(
-//                                                        JSONArray jsonArray,
-//                                                        GraphResponse response) {
-//                                                    // Application code for users friends
-//
-//                                                    try {
-//
-//                                                        for (int i = 0; i < jsonArray.length(); i++) {
-//                                                            JSONObject jsondataArray = jsonArray.getJSONObject(0);
-//                                                            String nameArray = jsondataArray.getString("name");
-//                                                            String idArray = jsondataArray.getString("id");
-//
-//                                                        }
-//
-//
-//
-//
-//                                                    } catch (Exception e) {
-//                                                        e.printStackTrace();
-//                                                    }
-//                                                }
-//                                            })
-//
-//                            );
-//                            batch.addCallback(new GraphRequestBatch.Callback() {
-//                                @Override
-//                                public void onBatchCompleted(GraphRequestBatch graphRequests) {
-//                                    // Application code for when the batch finishes
-//                                }
-//                            });
-//                            batch.executeAsync();
-//
-//                            Bundle parameters = new Bundle();
-//                            parameters.putString("fields", "id,name,link,picture");
-////
                        }
 
                         hideProgressDialog();
@@ -224,6 +142,9 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
                 });
     }
 
+    /**
+     * logs out of facebook and takes back to sign in page
+     */
     public void signOut() {
         mAuth.signOut();
         LoginManager.getInstance().logOut();
@@ -231,6 +152,10 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
         updateUI(null);
     }
 
+    /**
+     * shows the proper ui, depending on if signed in or not
+     * @param user firebase user
+     */
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
@@ -252,11 +177,15 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
     @Override
     public void onClick(View view) {
         int i = view.getId();
+        //signs out on click
         if (i == R.id.button_facebook_signout) {
             signOut();
         }
     }
 
+    /**
+     * shows a loading spinner
+     */
     public void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
@@ -266,17 +195,27 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
         mProgressDialog.show();
     }
 
+    /**
+     * hides loading spinner
+     */
     public void hideProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
         }
     }
 
+    /**
+     * initializes facebook sdk
+     */
     protected void facebookSDKInitialize() {
         FacebookSdk.sdkInitialize(getApplicationContext());
         mCallbackManager = CallbackManager.Factory.create();
     }
 
+    /**
+     * Gets facebook info from the logged in user, async task
+     * @param accessToken token indicating user logged in
+     */
     protected void getLoginDetails(AccessToken accessToken) {
         GraphRequestAsyncTask graphRequestAsyncTask = new GraphRequest(
                 accessToken,
@@ -299,7 +238,6 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
                                 Log.e(TAG, "name: " + name);
                                 Log.e(TAG, "id: " + id);
                                 friend newfriend = new friend(name, id);
-                                //// TODO: 2016-11-17 fix this, dont think its right, but can move on as is
                                 mDatabase.child("friends").child(uid).child(id).setValue(newfriend);
                             }
                         } catch (JSONException e) {
@@ -308,5 +246,93 @@ public class FacebookLoginActivity extends AppCompatActivity implements View.OnC
                     }
                 }
         ).executeAsync();
+    }
+
+    /**
+     * initializes views and buttons
+     */
+    public void setUpViews() {
+        mStatusTextView = (TextView) findViewById(R.id.status);
+        mDetailTextView = (TextView) findViewById(R.id.detail);
+        findViewById(R.id.button_facebook_signout).setOnClickListener(this);
+    }
+
+    /**
+     * sets up login button to sign into facebook
+     */
+    public void facebookLoginButton() {
+        LoginButton loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
+
+        //asks to recieve profile, email and friends from facebook on login
+        loginButton.setReadPermissions(Arrays.asList("public_profile", "email", "user_friends"));
+
+        //sets up callback to login button and gets details
+        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.d(TAG, "facebook:onSuccess:" +loginResult);
+                handleFacebookAccessToken(loginResult.getAccessToken());
+                getLoginDetails(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d(TAG, "facebook:onCancel");
+                updateUI(null);
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d(TAG, "facebook:onError", error);
+                updateUI(null);
+            }
+        });
+    }
+
+    /**
+     * saves user data to database
+     * @param task login task for facebook
+     */
+    public void saveUserToDatabase(Task<AuthResult> task) {
+
+        String name = task.getResult().getUser().getDisplayName();
+        String email = task.getResult().getUser().getEmail();
+        String image = task.getResult().getUser().getPhotoUrl().toString();
+        String id = Profile.getCurrentProfile().getId();
+        final String uid = task.getResult().getUser().getUid();
+
+
+        user = new User(uid, name, null, email, null, image, true, id);
+        mDatabase.child("users").child(uid).child("info").setValue(user);
+        mDatabase.child("public_profile").child(id).child("info").setValue(user);
+    }
+
+
+    /**
+     * sets up listener that runs if firebase user has changed, and either sends to profile page if signed in or shows login page if signed out
+     */
+    public void userChangedListener() {
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser muser = firebaseAuth.getCurrentUser();
+                if (muser != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + muser.getUid());
+
+                    //send to display profile activity
+                    Intent intent = new Intent(getApplicationContext(), display_profile.class);
+
+                    startActivity(intent);
+                }
+                else {
+                    //user is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+                //pretty redundant, but will send to login page
+                updateUI(muser);
+            }
+        };
     }
 }

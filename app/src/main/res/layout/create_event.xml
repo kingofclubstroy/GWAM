@@ -32,6 +32,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editCategory"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/startTimeText"
+        android:text="Start Time"/>
+
 
     <Button
         android:id="@+id/inviteFriends"

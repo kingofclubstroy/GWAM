@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.my.facebookauth.R;
@@ -28,7 +30,7 @@ import java.util.ArrayList;
 /**
  * Created by Owner on 2016-11-22.
  */
-
+//// TODO: 2017-01-03 need to add dropdowns to set start and end time and convert those times to UTC 
 public class CreateEvent extends AppCompatActivity {
 
 
@@ -51,6 +53,17 @@ public class CreateEvent extends AppCompatActivity {
     private String uid;
     private double lat;
     private double lng;
+    String wheelMenu1[] = new String[]{"name 1", "name2", "name3", "name4"};
+    String wheelMenu2[] = new String[]{"age1", "age2", "age3"};
+    String wheelMenu3[] = new String[]{"10", "20", "30"};
+
+    // Wheel scrolled flag
+    private boolean wheelScrolled = false;
+
+    private TextView text;
+    private EditText text1;
+    private EditText text2;
+    private EditText text3;
 
 
     @Override
@@ -72,7 +85,12 @@ public class CreateEvent extends AppCompatActivity {
         editDescription = (EditText) findViewById(R.id.editdescription);
         inviteFriends = (Button) findViewById(R.id.inviteFriends);
         createEvent = (Button) findViewById(R.id.create_event_complete);
+
+
         profileRef = FirebaseDatabase.getInstance().getReference().child("users").child(uid);
+
+
+
 
 
 
