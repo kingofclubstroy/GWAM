@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Criteria;
@@ -12,6 +13,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -51,6 +53,8 @@ public class getLocationActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String uid;
     String locationCountryNameGPS;
+    private SharedPreferences settings;
+    private SharedPreferences.Editor editor;
 
 
     private static final String[] INITIAL_PERMS= {
@@ -291,6 +295,18 @@ public class getLocationActivity extends AppCompatActivity {
 
     private boolean hasPermission(String perm) {
         return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));
+    }
+
+
+    //todo fix location settings by moving this into event feed
+    @Override
+    protected void onPause() {
+        super.onPause();
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = settings.edit();
+        editor.putFloat("lat", (float) laditudeGPS);
+        editor.putFloat("lng", (float) longitudeGPS);
+        editor.commit();
     }
 }
 

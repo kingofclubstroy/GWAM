@@ -43,18 +43,15 @@ public class CalendarActivity extends AppCompatActivity {
         interested_events = settings.getInt("interested_events", 0);
         String id = Profile.getCurrentProfile().getId();
         eventList = new ArrayList<>();
+        //todo store interested events in saved preferences if possible
         mRef = FirebaseDatabase.getInstance().getReference().child("public_profile").child(id).child("interested_events");
         ChildEventListener childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 event newEvent = dataSnapshot.getValue(event.class);
                 eventList.add(newEvent);
-                if (eventList.size() == interested_events) {
-                    paintCalender(eventList);
-                }
-                else {
-                    Log.e("onChildAdded", "paint not called");
-                }
+
+
             }
 
             //// TODO: 2016-12-15 cant leave these blank
@@ -72,8 +69,7 @@ public class CalendarActivity extends AppCompatActivity {
                 interested_events -= 1;
                 editor.putInt("interested_events", interested_events);
                 editor.commit();
-                Log.e("onChildRemoved ", "interested_events = " + interested_events);
-                paintCalender(eventList);
+
             }
 
             @Override
@@ -110,15 +106,6 @@ public class CalendarActivity extends AppCompatActivity {
 //        Log.e("onCreate: ", "i should be called first");
 
 
-
-
-
-    private void paintCalender(ArrayList<event> events) {
-        for (int i = 0; i < eventList.size(); i++) {
-            Log.e("calendar:", "" + events.get(i).getTitle());
-        }
-        Log.e("bus: ", "i actually got called!");
-    }
 
     @Override
     protected void onStart() {

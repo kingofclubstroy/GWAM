@@ -3,6 +3,7 @@ package com.example.my.facebookauth.models;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,37 +25,39 @@ import java.util.Map;
  * Created by Owner on 2016-11-25.
  */
 
-public abstract class FirebaseListAdapter<T> extends BaseAdapter implements Filterable {
+//public abstract class FirebaseListAdapter<T> extends RecyclerView.Adapter implements Filterable {
+//
+//    private static final String LOG_TAG = "FirebaseListAdapter";
+//    private DatabaseReference mRef;
+//    private Class<event> mModelClass;
+//    private int mLayout;
+//    private LayoutInflater mInflater;
+//    private List<event> mModels;
+//    private List<event> mFilteredModels;
+//    private Map<String, event> mModelKeys;
+//    private Map<String, event> mFilteredKeys;
+//    private ChildEventListener mListener;
+//    private Context mContext;
+//    private ValueFilter valueFilter;
+//
+//
+//    /**
+//     * @param mRef        The Firebase location to watch for data changes. Can also be a slice of a location, using some
+//     *                    combination of <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>,
+//     * @param mModelClass Firebase will marshall the data at a location into an instance of a class that you provide
+//     * @param mLayout     This is the mLayout used to represent a single list item. You will be responsible for populating an
+//     *                    instance of the corresponding view with the data from an instance of mModelClass.
+//     * @param activity    The activity containing the ListView
+//     */
+//    public FirebaseListAdapter(DatabaseReference mRef, Class<event> mModelClass, int mLayout, Activity activity) {
+//        this.mRef = mRef;
+//        this.mModelClass = mModelClass;
+//        this.mLayout = mLayout;
+//        mInflater = activity.getLayoutInflater();
+//        mModels = new ArrayList<>();
+//        mModelKeys = new HashMap<>();
 
-    private static final String LOG_TAG = "FirebaseListAdapter";
-    private DatabaseReference mRef;
-    private Class<T> mModelClass;
-    private int mLayout;
-    private LayoutInflater mInflater;
-    private List<T> mModels;
-    private List<T> mFilteredModels;
-    private Map<String, T> mModelKeys;
-    private Map<String, T> mFilteredKeys;
-    private ChildEventListener mListener;
-    private Context mContext;
-    private ValueFilter valueFilter;
-
-
-    /**
-     * @param mRef        The Firebase location to watch for data changes. Can also be a slice of a location, using some
-     *                    combination of <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>,
-     * @param mModelClass Firebase will marshall the data at a location into an instance of a class that you provide
-     * @param mLayout     This is the mLayout used to represent a single list item. You will be responsible for populating an
-     *                    instance of the corresponding view with the data from an instance of mModelClass.
-     * @param activity    The activity containing the ListView
-     */
-    public FirebaseListAdapter(DatabaseReference mRef, Class<T> mModelClass, int mLayout, Activity activity) {
-        this.mRef = mRef;
-        this.mModelClass = mModelClass;
-        this.mLayout = mLayout;
-        mInflater = activity.getLayoutInflater();
-        mModels = new ArrayList<>();
-        mModelKeys = new HashMap<>();
+//todo stopped here
 //         //Look for all child events. We will then map them to our own internal ArrayList, which backs ListView
 //        mListener = this.mRef.addChildEventListener(new ChildEventListener() {
 //            @Override
@@ -135,50 +138,54 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter implements Filt
 //                Log.e("FirebaseListAdapter", "Listen was cancelled, no more updates will occur");
 //            }
 //        });
-    }
 
-    public void cleanup() {
-        // We're being destroyed, let go of our mListener and forget about all of the mModels
-        mRef.removeEventListener(mListener);
-        mModels.clear();
-        mModelKeys.clear();
-    }
-
-    @Override
-    public int getCount() {
-        return mModels.size();
-    }
-
-    @Override
-    public Object getItem(int i) {
-        return mModels.get(i);
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return i;
-    }
-
-    public void remove(String key) {
-        T oldModel = mModelKeys.get(key);
-        mModels.remove(oldModel);
-        mModelKeys.remove(key);
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view == null) {
-            view = mInflater.inflate(mLayout, viewGroup, false);
-        }
-
-        T model = mModels.get(i);
-        if (model != null) {
-            // Call out to subclass to marshall this model into the provided view
-            populateView(view, model);
-        }
-        return view;
-    }
+//// TODO: 2017-04-10 started here
+//    }
+//
+//    public void cleanup() {
+//        // We're being destroyed, let go of our mListener and forget about all of the mModels
+//        mRef.removeEventListener(mListener);
+//        mModels.clear();
+//        mModelKeys.clear();
+//    }
+//
+//    @Override
+//    public int getItemCount() {
+//        return mModels.size();
+//    }
+//
+//
+//    @Override
+//    public long getItemId(int i) {
+//        return i;
+//    }
+//
+//    public void remove(String key) {
+//        event oldModel = mModelKeys.get(key);
+//        mModels.remove(oldModel);
+//        mModelKeys.remove(key);
+//        notifyDataSetChanged();
+//    }
+//
+//    @Override
+//    abstract public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+//
+//
+//    }
+//
+//    @Override
+//    public View getView(int i, View view, ViewGroup viewGroup) {
+//        if (view == null) {
+//            view = mInflater.inflate(mLayout, viewGroup, false);
+//        }
+//
+//        event model = mModels.get(i);
+//        if (model != null) {
+//            // Call out to subclass to marshall this model into the provided view
+//            populateView(view, model);
+//        }
+//        return view;
+//    }
 
     /**
      * Each time the data at the given Firebase location changes, this method will be called for each item that needs
@@ -189,80 +196,87 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter implements Filt
      * @param v     The view to populate
      * @param model The object containing the data used to populate the view
      */
-    protected abstract void populateView(View v, T model);
+    //protected abstract void populateView(View v, event model);
 
-    public void addSingle(DataSnapshot snapshot) {
-        T model = snapshot.getValue(FirebaseListAdapter.this.mModelClass);
-        mModelKeys.put(snapshot.getKey(), model);
-
-        mModels.add(model);
-
-        notifyDataSetChanged();
-    }
-
-    public void update(DataSnapshot snapshot, String key) {
-        T oldModel = mModelKeys.get(key);
-        T newModel = snapshot.getValue(FirebaseListAdapter.this.mModelClass);
-        int index = mModels.indexOf(oldModel);
-
-        if (index >= 0) {
-            mModels.set(index, newModel);
-            mModelKeys.put(key, newModel);
-
-            notifyDataSetChanged();
-        }
-    }
-
-    public boolean exists(String key) {
-        return mModelKeys.containsKey(key);
-    }
-
-    @Override
-    public Filter getFilter() {
-        if (valueFilter == null) {
-            valueFilter = new ValueFilter();
-        }
-        return valueFilter;
-    }
-
-    protected abstract List<T> filters(List<T> models, CharSequence constraint);
-
-    private class ValueFilter extends Filter {
-
-        //Invoked in a worker thread to filter the data according to the constraint.
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            FilterResults results = new FilterResults();
-            if (mFilteredModels == null) {
-                mFilteredModels = new ArrayList<>(mModels); // saves the original data in mOriginalValues
-                mFilteredKeys = new HashMap<>(mModelKeys); // saves the original data in mOriginalValues
-            }
-            if (constraint != null && constraint.length() > 0) {
-                List<T> filtered = filters(mFilteredModels, constraint);
-
-                results.count = filtered.size();
-                results.values = filtered;
-                mModelKeys = filterKeys(mModels);
-            } else {
-                results.count = mFilteredModels.size();
-                results.values = mFilteredModels;
-                mModelKeys = mFilteredKeys;
-            }
-            return results;
-        }
+//    public event addSingle(DataSnapshot snapshot) {
+//        event model = snapshot.getValue(event.class);
+//        mModelKeys.put(snapshot.getKey(), model);
+//
+//        mModels.add(model);
 
 
-        //Invoked in the UI thread to publish the filtering results in the user interface.
-        @SuppressWarnings("unchecked")
-        @Override
-        protected void publishResults(CharSequence constraint,
-                                      FilterResults results) {
-            Log.d(LOG_TAG, "filter for " + constraint + ", results nr: " + results.count);
-            mModels = (List<T>) results.values;
 
-            notifyDataSetChanged();
-        }
-    }
 
-    protected abstract Map<String, T> filterKeys(List<T> mModels);
-}
+
+//        notifyDataSetChanged();
+//
+//        return model;
+//
+//    }
+//
+//    public void update(DataSnapshot snapshot, String key) {
+//        event oldModel = mModelKeys.get(key);
+//        event newModel = snapshot.getValue(event.class);
+//        int index = mModels.indexOf(oldModel);
+//
+//        if (index >= 0) {
+//            mModels.set(index, newModel);
+//            mModelKeys.put(key, newModel);
+//
+//            notifyDataSetChanged();
+//        }
+//    }
+//
+//    public boolean exists(String key) {
+//        return mModelKeys.containsKey(key);
+//    }
+//
+//    @Override
+//    public Filter getFilter() {
+//        if (valueFilter == null) {
+//            valueFilter = new ValueFilter();
+//        }
+//        return valueFilter;
+//    }
+//
+//    protected abstract List<event> filters(List<event> models, CharSequence constraint);
+//
+//    private class ValueFilter extends Filter {
+//
+//        //Invoked in a worker thread to filter the data according to the constraint.
+//        @Override
+//        protected FilterResults performFiltering(CharSequence constraint) {
+//            FilterResults results = new FilterResults();
+//            if (mFilteredModels == null) {
+//                mFilteredModels = new ArrayList<>(mModels); // saves the original data in mOriginalValues
+//                mFilteredKeys = new HashMap<>(mModelKeys); // saves the original data in mOriginalValues
+//            }
+//            if (constraint != null && constraint.length() > 0) {
+//                List<event> filtered = filters(mFilteredModels, constraint);
+//
+//                results.count = filtered.size();
+//                results.values = filtered;
+//                mModelKeys = filterKeys(mModels);
+//            } else {
+//                results.count = mFilteredModels.size();
+//                results.values = mFilteredModels;
+//                mModelKeys = mFilteredKeys;
+//            }
+//            return results;
+//        }
+//
+//
+//        //Invoked in the UI thread to publish the filtering results in the user interface.
+//        @SuppressWarnings("unchecked")
+//        @Override
+//        protected void publishResults(CharSequence constraint,
+//                                      FilterResults results) {
+//            Log.d(LOG_TAG, "filter for " + constraint + ", results nr: " + results.count);
+//            mModels = (List<event>) results.values;
+//
+//            notifyDataSetChanged();
+//        }
+//    }
+//
+//    protected abstract Map<String, event> filterKeys(List<event> mModels);
+//}

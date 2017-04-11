@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/emoji-keyboard/emoji-keyboard.iml" filepath="$PROJECT_DIR$/emoji-keyboard/emoji-keyboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebookauth.iml" filepath="$PROJECT_DIR$/facebookauth.iml" />
     </modules>
   </component>

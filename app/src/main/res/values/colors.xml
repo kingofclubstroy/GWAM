@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#2aaf39</color>
-    <color name="colorPrimaryDark">#26a034</color>
-    <color name="colorAccent">#2ec13f</color>
+    <color name="colorPrimary">#39ba64</color>
+    <color name="colorPrimaryDark">#3fc66a</color>
+    <color name="colorAccent">#3fc66a</color>
+
 
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
     <color name="white">#FFFFFF</color>
+
+    <color name="event_color_01">#59dbe0</color>
+    <color name="event_color_02">#f57f68</color>
+    <color name="event_color_03">#87d288</color>
+    <color name="event_color_04">#f8b552</color>
+    <color name="toolbar">#efefef</color>
+    <color name="toolbar_text">#8f000000</color>
+    <color name="accent">#2789e4</color>
+    <color name="Games_color">#FFD150</color>
+    <color name="Music_color">#64e2d6</color>
+    <color name="Rec_color">#5cc9ff</color>
+    <color name="Party_color">#c38aff</color>
+    <color name="Food_color">#ff9292</color>
+    <color name="All_color">#e2e2e2</color>
 </resources>

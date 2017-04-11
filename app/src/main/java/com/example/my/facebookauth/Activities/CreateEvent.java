@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -154,7 +153,7 @@ public class CreateEvent extends AppCompatActivity {
             Toast.makeText(this, "need to fill all required fields", Toast.LENGTH_SHORT).show();
             return;
         }
-        event createdEvent = new event(name, title, description, category, invites, eventId);
+        event createdEvent = new event(name, title, description, category, invites);
 
         mRef.child(eventId).setValue(createdEvent);
         geoFire.setLocation(eventId, new GeoLocation(lat, lng));

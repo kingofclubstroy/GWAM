@@ -1,5 +1,6 @@
 package com.example.my.facebookauth.Activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import com.example.my.facebookauth.R;
 import com.example.my.facebookauth.models.User;
 import com.example.my.facebookauth.models.event;
 import com.example.my.facebookauth.utilities.ImageLoadTask;
+import com.example.my.facebookauth.utilities.savedPreferences;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,14 +32,11 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.my.facebookauth.R.id.calenderButton;
-
 /**
  * Created by Owner on 2016-11-13.
  */
 //This activity is the temporary functional hub for testing, and the first activity if signed on
 //// TODO: 2017-01-03 gut this whole thing, initial activity will be event feed in the final shit
-    //i am a butt
 
 public class display_profile extends AppCompatActivity implements View.OnClickListener {
 
@@ -47,7 +46,7 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
     private ImageView profilePic;
     private TextView displayName;
     private String uid;
-    private Button button;
+    private Button button, scrollButton;
     private double lat, lng;
     private List<event> interestedEventList;
     private SharedPreferences settings;
@@ -57,6 +56,7 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
     private String interested_events_id = "interested_events_id";
     private DatabaseReference userRef;
     DatabaseReference publicRef;
+    private Context context;
 
 
 
@@ -97,6 +97,8 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
         privateProfileListener();
 
         publicProfileListener();
+
+        context = getApplicationContext();
 
     }
 
@@ -145,29 +147,6 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
         startActivity(intent);
     }
 
-    /**
-     * Turns the provided stringList of event ids into a JSON object to be saved in savedPreferences
-     * @param key name of the place to store data is saved preferences
-     * @param stringList list of interested events
-     */
-    public void putListString(String key, List<String> stringList) {
-        Gson gson = new Gson();
-        String jsonText = gson.toJson(stringList);
-        editor.putString(key, jsonText);
-        editor.commit();
-    }
-
-    /**
-     * Turns provided List of events into a JSON object to be saved in savedPreferences
-     * @param key name of the place to store data is saved preferences
-     * @param eventList list of interested events
-     */
-    public void putListEvent(String key, List<event> eventList) {
-        Gson gson = new Gson();
-        String jsonText = gson.toJson(eventList);
-        editor.putString(key, jsonText);
-        editor.commit();
-    }
 
     //todo is sloppy but will be entirely replaced, so tollerable for now
     /**
@@ -182,6 +161,11 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
         getLocationActivity();
 
         calanderSetUp();
+
+        //remove
+        scrollViewSetUp();
+
+        emojiKeyboard();
     }
 
     /**
@@ -226,8 +210,8 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onClick(View view) {
                 //// TODO: 2017-01-06  will probably store this data onPause so there is no issue transfering from every view
-                putListString(interested_events_id, interestedEventListId);
-                putListEvent(interested_events, interestedEventList);
+                savedPreferences.putListString(interested_events_id, interestedEventListId, editor);
+                savedPreferences.putListEvent(interested_events, interestedEventList,editor);
 
                 Intent intent = new Intent(getApplicationContext(), event_feed.class);
                 startActivity(intent);
@@ -259,7 +243,29 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
         findViewById(R.id.calenderButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
+                Intent intent = new Intent(getApplicationContext(), calendar_view_activity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    public void scrollViewSetUp() {
+
+//        new SingleDateAndTimePickerDialog.Builder(context)
+//                //.bottomSheet()
+//                //.curved()
+//                //.minutesStep(15)
+//                .title("Simple")
+//                .listener(new SingleDateAndTimePickerDialog.Listener() {
+//                    @Override
+//                    public void onDateSelected(Date date) {
+//
+//                    }
+//                }).display();
+        findViewById(R.id.scrollviewButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), scrollViewActivity.class);
                 startActivity(intent);
             }
         });
@@ -285,7 +291,7 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
             //runs everytime a child is changed
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                //// TODO: 2017-01-03 add if works
+                //// TODO: 2017-01-03 add
             }
 
             //everytime child is removed
@@ -308,5 +314,15 @@ public class display_profile extends AppCompatActivity implements View.OnClickLi
 
         //this is the database reference the listener run on
         publicRef.child("interested_events").addChildEventListener(publicEventListener);
+    }
+
+    public void emojiKeyboard() {
+        findViewById(R.id.emojiKeyboard).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), keyboardActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
